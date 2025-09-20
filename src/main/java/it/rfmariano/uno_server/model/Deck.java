@@ -7,7 +7,7 @@ import java.util.Deque;
 import java.util.List;
 
 public class Deck {
-    private final Deque<Card> cards;
+    private Deque<Card> cards;
 
     public Deck() {
         List<Card> ordered = new ArrayList<>(108);
@@ -31,6 +31,11 @@ public class Deck {
 
         Collections.shuffle(ordered);
         this.cards = new ArrayDeque<>(ordered);
+    }
+
+    public void load(List<Card> cards) {
+        Collections.shuffle(cards);
+        this.cards = new ArrayDeque<>(cards);
     }
 
     public int size() {

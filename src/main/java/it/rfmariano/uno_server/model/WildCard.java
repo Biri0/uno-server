@@ -6,4 +6,9 @@ public record WildCard(WildType type) implements Card {
     public WildCard {
         Objects.requireNonNull(type, "type");
     }
+
+    @Override
+    public boolean isPlayableOver(Card topCard, CardColor chosenColor) {
+        return true;
+    }
 }

@@ -34,7 +34,7 @@ public class Player {
         Objects.requireNonNull(topCard, "topCard");
         List<Integer> playable = new ArrayList<>();
         for (int i = 0; i < cards.size(); i++) {
-            if (isPlayable(topCard, chosenColor, cards.get(i))) {
+            if (cards.get(i).isPlayableOver(topCard, chosenColor)) {
                 playable.add(i);
             }
         }
@@ -48,28 +48,5 @@ public class Player {
             playable.add(cards.get(i));
         }
         return playable;
-    }
-
-    private static boolean isPlayable(Card topCard, CardColor chosenColor, Card candidate) {
-        if (candidate instanceof WildCard) {
-            return true;
-        }
-
-        CardColor colorToMatch = (topCard instanceof ColoredCard cc)
-                ? cc.color()
-                : Objects.requireNonNull(chosenColor, "chosenColor");
-
-        if (candidate instanceof ColoredCard col) {
-            if (col.color() == colorToMatch) {
-                return true;
-            }
-            if (candidate instanceof NumberCard nc && topCard instanceof NumberCard tn && nc.value() == tn.value()) {
-                return true;
-            }
-            if (candidate instanceof ActionCard ac && topCard instanceof ActionCard ta && ac.action() == ta.action()) {
-                return true;
-            }
-        }
-        return false;
     }
 }
