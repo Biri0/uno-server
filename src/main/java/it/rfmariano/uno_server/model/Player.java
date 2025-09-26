@@ -4,11 +4,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+import org.hibernate.annotations.Type;
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "player")
 public class Player {
+    @Id
+    private UUID id;
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
     private final List<Card> cards;
 
     public Player() {
+        this.id = UuidCreator.getTimeOrderedEpoch();
         this.cards = new ArrayList<>();
     }
 

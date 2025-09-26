@@ -1,15 +1,29 @@
 package it.rfmariano.uno_server.model;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "deck")
 public class Deck {
-    private Deque<Card> cards;
+    @Id
+    private UUID id;
+    @org.hibernate.annotations.Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<Card> cards;
 
     public Deck() {
+        id = UuidCreator.getTimeOrderedEpoch();
         List<Card> ordered = new ArrayList<>(108);
 
         for (CardColor color : CardColor.values()) {
@@ -30,12 +44,12 @@ public class Deck {
         }
 
         Collections.shuffle(ordered);
-        this.cards = new ArrayDeque<>(ordered);
+        this.cards = new ArrayList<>(ordered);
     }
 
     public void load(List<Card> cards) {
         Collections.shuffle(cards);
-        this.cards = new ArrayDeque<>(cards);
+        this.cards = new ArrayList<>(cards);
     }
 
     public int size() {
@@ -43,7 +57,7 @@ public class Deck {
     }
 
     public Card draw() {
-        return cards.pollFirst();
+        return cards.removeFirst();
     }
 
     public boolean isEmpty() {

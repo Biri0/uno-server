@@ -1,24 +1,54 @@
 package it.rfmariano.uno_server.model;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+import org.hibernate.annotations.Type;
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "game")
 public class Game {
-    private final Deck deck;
-    private final Player[] players;
-    private final Deque<Card> discardPile;
+    @Id
+    private UUID id;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private final Deck deck;
+    @OneToMany(cascade = CascadeType.ALL)
+    private final List<Player> players;
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private final List<Card> discardPile;
+
+    @Column(name = "chosen_color", nullable = true)
     private CardColor chosenColor;
+    @Column(name = "winner_index", nullable = true)
     private Integer winnerIndex;
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
     private Card currentCard;
+    @Column(name = "current_player_index", nullable = false)
     private int currentPlayerIndex;
+    @Column(name = "direction", nullable = false)
     private int direction;
 
-    public Game(Player[] players) {
+    public Game(ArrayList<Player> players) {
+        id = UuidCreator.getTimeOrderedEpoch();
+
         this.deck = new Deck();
-        this.discardPile = new ArrayDeque<>();
+        this.discardPile = new ArrayList<>();
         this.players = players;
 
         currentPlayerIndex = 0;
@@ -33,7 +63,7 @@ public class Game {
     }
 
     public Player currentPlayer() {
-        return this.players[this.currentPlayerIndex];
+        return this.players.get(this.currentPlayerIndex);
     }
 
     public int currentPlayerIndex() {
@@ -51,7 +81,7 @@ public class Game {
         }
 
         if (this.currentCard != null) {
-            discardPile.addLast(this.currentCard);
+            discardPile.add(this.currentCard);
         }
 
         Card played = currentPlayer().playCard(cardIndex);
@@ -77,7 +107,7 @@ public class Game {
                 case SKIP -> advanceTurn();
                 case REVERSE -> {
                     this.direction = -this.direction;
-                    if (players.length == 2) {
+                    if (players.size() == 2) {
                         advanceTurn();
                     }
                 }
@@ -92,21 +122,21 @@ public class Game {
     }
 
     private void drawCards(int playerIndex, int cards) {
-        int idx = Math.floorMod(playerIndex, players.length);
+        int idx = Math.floorMod(playerIndex, players.size());
         for (int i = 0; i < cards; i++) {
             if (deck.isEmpty()) {
                 deck.load(new ArrayList<>(discardPile));
                 discardPile.clear();
             }
-            players[idx].drawCard(deck.draw());
+            players.get(idx).drawCard(deck.draw());
         }
     }
 
     private void advanceTurn() {
-        currentPlayerIndex = Math.floorMod(currentPlayerIndex + direction, players.length);
+        currentPlayerIndex = Math.floorMod(currentPlayerIndex + direction, players.size());
     }
 
     private int nextPlayer() {
-        return Math.floorMod(currentPlayerIndex + direction, players.length);
+        return Math.floorMod(currentPlayerIndex + direction, players.size());
     }
 }
